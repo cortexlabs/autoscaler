@@ -534,7 +534,7 @@ func runSimpleScaleUpTest(t *testing.T, config *scaleTestConfig) *scaleTestResul
 
 	processors := NewTestProcessors()
 
-	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, extraPods, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil)
+	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, extraPods, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil, nil)
 	processors.ScaleUpStatusProcessor.Process(&context, scaleUpStatus)
 
 	assert.NoError(t, err)
@@ -687,7 +687,7 @@ func TestScaleUpUnhealthy(t *testing.T) {
 	p3 := BuildTestPod("p-new", 550, 0)
 
 	processors := NewTestProcessors()
-	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, []*apiv1.Pod{p3}, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil)
+	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, []*apiv1.Pod{p3}, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil, nil)
 
 	assert.NoError(t, err)
 	// Node group is unhealthy.
@@ -727,7 +727,7 @@ func TestScaleUpNoHelp(t *testing.T) {
 	p3 := BuildTestPod("p-new", 500, 0)
 
 	processors := NewTestProcessors()
-	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, []*apiv1.Pod{p3}, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil)
+	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, []*apiv1.Pod{p3}, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil, nil)
 	processors.ScaleUpStatusProcessor.Process(&context, scaleUpStatus)
 
 	assert.NoError(t, err)
@@ -796,7 +796,7 @@ func TestScaleUpBalanceGroups(t *testing.T) {
 	}
 
 	processors := NewTestProcessors()
-	scaleUpStatus, typedErr := ScaleUp(&context, processors, clusterState, pods, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil)
+	scaleUpStatus, typedErr := ScaleUp(&context, processors, clusterState, pods, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil, nil)
 
 	assert.NoError(t, typedErr)
 	assert.True(t, scaleUpStatus.WasSuccessful())
@@ -856,7 +856,7 @@ func TestScaleUpAutoprovisionedNodeGroup(t *testing.T) {
 	nodes := []*apiv1.Node{}
 	nodeInfos, _ := utils.GetNodeInfosForGroups(nodes, nil, provider, context.ListerRegistry, []*appsv1.DaemonSet{}, context.PredicateChecker, nil)
 
-	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, []*apiv1.Pod{p1}, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil)
+	scaleUpStatus, err := ScaleUp(&context, processors, clusterState, []*apiv1.Pod{p1}, nodes, []*appsv1.DaemonSet{}, nodeInfos, nil, nil)
 	assert.NoError(t, err)
 	assert.True(t, scaleUpStatus.WasSuccessful())
 	assert.Equal(t, "autoprovisioned-T1", utils.GetStringFromChan(createdGroups))

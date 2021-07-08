@@ -38,6 +38,41 @@ import (
 	klog "k8s.io/klog/v2"
 )
 
+type TokenBucketRateLimiter struct {
+	// targeted number of nodes per min
+	maxNumberOfNodesPerMin int
+	burstMaxNumberOfNodesPerMin int
+	token int
+	lastReserve time.Time
+	mu sync.Mutex
+}
+
+func (t *TokenBucketRateLimiter) AcquireNodes(newNodes int) (bool, int) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	now := time.Now()
+	tokenNow := int(now.Sub(t.lastReserve).Minutes()) * t.maxNumberOfNodesPerMin + t.token
+	if tokenNow > t.burstMaxNumberOfNodesPerMin {
+		tokenNow = t.burstMaxNumberOfNodesPerMin
+	}
+
+	if tokenNow <= 0 {
+		// no quota, can not scale up
+		return false, 0
+	}
+
+	if newNodes > tokenNow {
+		// can only use up to (tokenNow) nodes, the rest (newNodes - tokenNow) nodes can not meet
+		t.token = 0
+		t.lastReserve = now
+		return true, tokenNow
+	}
+	t.token = tokenNow - newNodes
+	t.lastReserve = now
+	return true, newNodes
+}
+
 // GetNodeInfosForGroups finds NodeInfos for all node groups used to manage the given nodes. It also returns a node group to sample node mapping.
 func GetNodeInfosForGroups(nodes []*apiv1.Node, nodeInfoCache map[string]*schedulerframework.NodeInfo, cloudProvider cloudprovider.CloudProvider, listers kube_util.ListerRegistry,
 	// TODO(mwielgus): This returns map keyed by url, while most code (including scheduler) uses node.Name for a key.
