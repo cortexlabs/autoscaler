@@ -81,7 +81,7 @@ type StaticAutoscaler struct {
 	ignoredTaints taints.TaintKeySet
 
 	// rate limiter to limit number of nodes in 1 scale up
-	scaleUpRateLimiter       *TokenBucketRateLimiter
+	scaleUpRateLimiter *TokenBucketRateLimiter
 }
 
 type staticAutoscalerProcessorCallbacks struct {
@@ -154,12 +154,12 @@ func NewStaticAutoscaler(
 
 	var scaleUpRateLimiter *TokenBucketRateLimiter
 
-	if opts.ScaleUpRateLimitEnabled && opts.ScaleUpMaxNumberOfNodesPerMin > 0 && opts.ScaleUpBurstMaxNumberOfNodesPerMin > 0{
+	if opts.ScaleUpRateLimitEnabled && opts.ScaleUpMaxNumberOfNodesPerMin > 0 && opts.ScaleUpBurstMaxNumberOfNodesPerMin > 0 {
 		scaleUpRateLimiter = &TokenBucketRateLimiter{
-			maxNumberOfNodesPerMin: opts.ScaleUpMaxNumberOfNodesPerMin,
+			maxNumberOfNodesPerMin:      opts.ScaleUpMaxNumberOfNodesPerMin,
 			burstMaxNumberOfNodesPerMin: opts.ScaleUpBurstMaxNumberOfNodesPerMin,
-			token: 0,
-			lastReserve: time.Now(),
+			token:                       0,
+			lastReserve:                 time.Now(),
 		}
 	}
 
