@@ -175,8 +175,8 @@ var (
 	enableProfiling                    = flag.Bool("profiling", false, "Is debug/pprof endpoint enabled")
 	clusterAPICloudConfigAuthoritative = flag.Bool("clusterapi-cloud-config-authoritative", false, "Treat the cloud-config flag authoritatively (do not fallback to using kubeconfig flag). ClusterAPI only")
 
-	scaleUpRateLimitEnabledFlag = flag.Bool("scale-up-rate-limit-enabled", false, "Should CA enable scale-up ratelimiting")
-	scaleUpMaxNumberOfNodesPerMin = flag.Int("scale-up-max-number-nodes-per-min", -1, "Maximum number of nodes CA can scale up in 1 iteration")
+	scaleUpRateLimitEnabledFlag     = flag.Bool("scale-up-rate-limit-enabled", false, "Should CA enable scale-up ratelimiting")
+	scaleUpMaxNumberOfNodesPerMin   = flag.Int("scale-up-max-number-nodes-per-min", -1, "Maximum number of nodes CA can scale up in 1 iteration")
 	scaleUpBurstNumberOfNodesPerMin = flag.Int("scale-up-burst-number-nodes-per-min", -1, "Maximum burst number of nodes CA can scale up in 1 iteration")
 )
 
