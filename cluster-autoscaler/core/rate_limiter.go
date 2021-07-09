@@ -21,37 +21,40 @@ import (
 	"time"
 )
 
-type TokenBucketRateLimiter struct {
+type ScaleUpRateLimiter struct {
 	// targeted number of nodes per min
-	maxNumberOfNodesPerMin      int
+	maxNumberOfNodesPerMin int
+	// burst number of nodes per min
 	burstMaxNumberOfNodesPerMin int
-	token                       int
-	lastReserve                 time.Time
-	mu                          sync.Mutex
+	// node slots that haven't been used in the previous iteration
+	UnusedNodeSlots int
+	// last reserve time
+	lastReserve time.Time
+	mu          sync.Mutex
 }
 
-func (t *TokenBucketRateLimiter) AcquireNodes(newNodes int) (bool, int) {
+func (t *ScaleUpRateLimiter) AcquireNodes(newNodes int) (bool, int) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
 	now := time.Now()
-	tokenNow := int(now.Sub(t.lastReserve).Minutes())*t.maxNumberOfNodesPerMin + t.token
-	if tokenNow > t.burstMaxNumberOfNodesPerMin {
-		tokenNow = t.burstMaxNumberOfNodesPerMin
+	allowedNumNodesToAdd := int(now.Sub(t.lastReserve).Minutes())*t.maxNumberOfNodesPerMin + t.UnusedNodeSlots
+	if allowedNumNodesToAdd > t.burstMaxNumberOfNodesPerMin {
+		allowedNumNodesToAdd = t.burstMaxNumberOfNodesPerMin
 	}
 
-	if tokenNow <= 0 {
+	if allowedNumNodesToAdd <= 0 {
 		// no quota, can not scale up
 		return false, 0
 	}
 
-	if newNodes > tokenNow {
-		// can only use up to (tokenNow) nodes, the rest (newNodes - tokenNow) nodes can not meet
-		t.token = 0
-		t.lastReserve = now
-		return true, tokenNow
-	}
-	t.token = tokenNow - newNodes
 	t.lastReserve = now
+	if newNodes > allowedNumNodesToAdd {
+		// can only use up to (tokenNow) nodes, the rest (newNodes - tokenNow) nodes can not meet
+		t.UnusedNodeSlots = 0
+		return true, allowedNumNodesToAdd
+	}
+	t.UnusedNodeSlots = allowedNumNodesToAdd - newNodes
+
 	return true, newNodes
 }
