@@ -27,7 +27,7 @@ type ScaleUpRateLimiter struct {
 	// burst number of nodes per min
 	burstMaxNumberOfNodesPerMin int
 	// node slots that haven't been used in the previous iteration
-	UnusedNodeSlots int
+	unusedNodeSlots int
 	// last reserve time
 	lastReserve time.Time
 	mu          sync.Mutex
@@ -38,7 +38,7 @@ func (t *ScaleUpRateLimiter) AcquireNodes(newNodes int) (bool, int) {
 	defer t.mu.Unlock()
 
 	now := time.Now()
-	allowedNumNodesToAdd := int(now.Sub(t.lastReserve).Minutes())*t.maxNumberOfNodesPerMin + t.UnusedNodeSlots
+	allowedNumNodesToAdd := int(now.Sub(t.lastReserve).Minutes())*t.maxNumberOfNodesPerMin + t.unusedNodeSlots
 	if allowedNumNodesToAdd > t.burstMaxNumberOfNodesPerMin {
 		allowedNumNodesToAdd = t.burstMaxNumberOfNodesPerMin
 	}
@@ -51,10 +51,10 @@ func (t *ScaleUpRateLimiter) AcquireNodes(newNodes int) (bool, int) {
 	t.lastReserve = now
 	if newNodes > allowedNumNodesToAdd {
 		// can only use up to (tokenNow) nodes, the rest (newNodes - tokenNow) nodes can not meet
-		t.UnusedNodeSlots = 0
+		t.unusedNodeSlots = 0
 		return true, allowedNumNodesToAdd
 	}
-	t.UnusedNodeSlots = allowedNumNodesToAdd - newNodes
+	t.unusedNodeSlots = allowedNumNodesToAdd - newNodes
 
 	return true, newNodes
 }
