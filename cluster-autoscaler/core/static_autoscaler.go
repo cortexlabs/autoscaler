@@ -158,7 +158,7 @@ func NewStaticAutoscaler(
 		scaleUpRateLimiter = &ScaleUpRateLimiter{
 			maxNumberOfNodesPerMin:      opts.ScaleUpMaxNumberOfNodesPerMin,
 			burstMaxNumberOfNodesPerMin: opts.ScaleUpBurstMaxNumberOfNodesPerMin,
-			UnusedNodeSlots:             0,
+			unusedNodeSlots:             0,
 			lastReserve:                 time.Now(),
 		}
 	}
