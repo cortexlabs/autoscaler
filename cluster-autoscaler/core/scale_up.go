@@ -310,7 +310,7 @@ func computeExpansionOption(context *context.AutoscalingContext, podEquivalenceG
 // false if it didn't and error if an error occurred. Assumes that all nodes in the cluster are
 // ready and in sync with instance groups.
 func ScaleUp(context *context.AutoscalingContext, processors *ca_processors.AutoscalingProcessors, clusterStateRegistry *clusterstate.ClusterStateRegistry, unschedulablePods []*apiv1.Pod,
-	nodes []*apiv1.Node, daemonSets []*appsv1.DaemonSet, nodeInfos map[string]*schedulerframework.NodeInfo, ignoredTaints taints.TaintKeySet) (*status.ScaleUpStatus, errors.AutoscalerError) {
+	nodes []*apiv1.Node, daemonSets []*appsv1.DaemonSet, nodeInfos map[string]*schedulerframework.NodeInfo, ignoredTaints taints.TaintKeySet, scaleUpRateLimiter *ScaleUpRateLimiter) (*status.ScaleUpStatus, errors.AutoscalerError) {
 	// From now on we only care about unschedulable pods that were marked after the newest
 	// node became available for the scheduler.
 	if len(unschedulablePods) == 0 {
@@ -452,6 +452,20 @@ func ScaleUp(context *context.AutoscalingContext, processors *ca_processors.Auto
 		options = append(options, o)
 	}
 	bestOption := context.ExpanderStrategy.BestOption(options, nodeInfos)
+	if bestOption != nil && bestOption.NodeCount > 0 {
+		newNodes := bestOption.NodeCount
+		if newNodes > 0 && scaleUpRateLimiter != nil {
+			klog.V(1).Infof("Scale-Up ratelimiting enabled, re-evaluating %d new nodes", newNodes)
+			withinScaleUpLimit, targetedNumberOfNewNodes := scaleUpRateLimiter.AcquireNodes(newNodes)
+			if withinScaleUpLimit {
+				klog.V(1).Infof("Scale-Up ratelimiting enabled, able to scale up %d nodes", targetedNumberOfNewNodes)
+			} else {
+				klog.V(1).Infof("Scale-Up ratelimiting enabled, NOT able to scale up due to hit scale-up ratelimiting of %d nodes per min, burst at %d nodes, ignore this scale-up", scaleUpRateLimiter.maxNumberOfNodesPerMin, scaleUpRateLimiter.burstMaxNumberOfNodesPerMin)
+			}
+			bestOption.NodeCount = targetedNumberOfNewNodes
+		}
+	}
+
 	if bestOption != nil && bestOption.NodeCount > 0 {
 		klog.V(1).Infof("Best option to resize: %s", bestOption.NodeGroup.Id())
 		if len(bestOption.Debug) > 0 {
