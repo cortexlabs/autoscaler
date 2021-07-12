@@ -952,30 +952,20 @@ func TestStaticAutoscalerInstaceCreationErrors(t *testing.T) {
 	nodeGroupA.On("DeleteNodes", mock.Anything).Return(nil)
 	nodeGroupA.On("Nodes").Return([]cloudprovider.Instance{
 		{
-			Id: "A1",
-			Status: &cloudprovider.InstanceStatus{
+			"A1",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceRunning,
 			},
 		},
 		{
-			Id: "A2",
-			Status: &cloudprovider.InstanceStatus{
+			"A2",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceCreating,
 			},
 		},
 		{
-			Id: "A3",
-			Status: &cloudprovider.InstanceStatus{
-				State: cloudprovider.InstanceCreating,
-				ErrorInfo: &cloudprovider.InstanceErrorInfo{
-					ErrorClass: cloudprovider.OutOfResourcesErrorClass,
-					ErrorCode:  "RESOURCE_POOL_EXHAUSTED",
-				},
-			},
-		},
-		{
-			Id: "A4",
-			Status: &cloudprovider.InstanceStatus{
+			"A3",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceCreating,
 				ErrorInfo: &cloudprovider.InstanceErrorInfo{
 					ErrorClass: cloudprovider.OutOfResourcesErrorClass,
@@ -984,8 +974,18 @@ func TestStaticAutoscalerInstaceCreationErrors(t *testing.T) {
 			},
 		},
 		{
-			Id: "A5",
-			Status: &cloudprovider.InstanceStatus{
+			"A4",
+			&cloudprovider.InstanceStatus{
+				State: cloudprovider.InstanceCreating,
+				ErrorInfo: &cloudprovider.InstanceErrorInfo{
+					ErrorClass: cloudprovider.OutOfResourcesErrorClass,
+					ErrorCode:  "RESOURCE_POOL_EXHAUSTED",
+				},
+			},
+		},
+		{
+			"A5",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceCreating,
 				ErrorInfo: &cloudprovider.InstanceErrorInfo{
 					ErrorClass: cloudprovider.OutOfResourcesErrorClass,
@@ -994,8 +994,8 @@ func TestStaticAutoscalerInstaceCreationErrors(t *testing.T) {
 			},
 		},
 		{
-			Id: "A6",
-			Status: &cloudprovider.InstanceStatus{
+			"A6",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceCreating,
 				ErrorInfo: &cloudprovider.InstanceErrorInfo{
 					ErrorClass: cloudprovider.OtherErrorClass,
@@ -1012,8 +1012,8 @@ func TestStaticAutoscalerInstaceCreationErrors(t *testing.T) {
 	nodeGroupB.On("DeleteNodes", mock.Anything).Return(nil)
 	nodeGroupB.On("Nodes").Return([]cloudprovider.Instance{
 		{
-			Id: "B1",
-			Status: &cloudprovider.InstanceStatus{
+			"B1",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceRunning,
 			},
 		},
@@ -1082,38 +1082,38 @@ func TestStaticAutoscalerInstaceCreationErrors(t *testing.T) {
 	// restub node group A so nodes are no longer reporting errors
 	nodeGroupA.On("Nodes").Return([]cloudprovider.Instance{
 		{
-			Id: "A1",
-			Status: &cloudprovider.InstanceStatus{
+			"A1",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceRunning,
 			},
 		},
 		{
-			Id: "A2",
-			Status: &cloudprovider.InstanceStatus{
+			"A2",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceCreating,
 			},
 		},
 		{
-			Id: "A3",
-			Status: &cloudprovider.InstanceStatus{
+			"A3",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceDeleting,
 			},
 		},
 		{
-			Id: "A4",
-			Status: &cloudprovider.InstanceStatus{
+			"A4",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceDeleting,
 			},
 		},
 		{
-			Id: "A5",
-			Status: &cloudprovider.InstanceStatus{
+			"A5",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceDeleting,
 			},
 		},
 		{
-			Id: "A6",
-			Status: &cloudprovider.InstanceStatus{
+			"A6",
+			&cloudprovider.InstanceStatus{
 				State: cloudprovider.InstanceDeleting,
 			},
 		},

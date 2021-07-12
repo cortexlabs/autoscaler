@@ -50,7 +50,6 @@ func (t *ScaleUpRateLimiter) AcquireNodes(newNodes int) (bool, int) {
 
 	t.lastReserve = now
 	if newNodes > allowedNumNodesToAdd {
-		// can only use up to (tokenNow) nodes, the rest (newNodes - tokenNow) nodes can not meet
 		t.unusedNodeSlots = 0
 		return true, allowedNumNodesToAdd
 	}
