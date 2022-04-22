@@ -182,6 +182,10 @@ var (
 	userAgent                          = flag.String("user-agent", "cluster-autoscaler", "User agent used for HTTP calls.")
 
 	emitPerNodeGroupMetrics = flag.Bool("emit-per-nodegroup-metrics", false, "If true, emit per node group metrics.")
+
+	scaleUpRateLimitEnabledFlag     = flag.Bool("scale-up-rate-limit-enabled", false, "Should CA enable scale-up ratelimiting")
+	scaleUpMaxNumberOfNodesPerMin   = flag.Int("scale-up-max-number-nodes-per-min", -1, "Maximum number of nodes CA can scale up in 1 iteration")
+	scaleUpBurstNumberOfNodesPerMin = flag.Int("scale-up-burst-number-nodes-per-min", -1, "Maximum burst number of nodes CA can scale up in 1 iteration")
 )
 
 func createAutoscalingOptions() config.AutoscalingOptions {
@@ -259,6 +263,9 @@ func createAutoscalingOptions() config.AutoscalingOptions {
 		DaemonSetEvictionForEmptyNodes:     *daemonSetEvictionForEmptyNodes,
 		DaemonSetEvictionForOccupiedNodes:  *daemonSetEvictionForOccupiedNodes,
 		UserAgent:                          *userAgent,
+		ScaleUpRateLimitEnabled:            *scaleUpRateLimitEnabledFlag,
+		ScaleUpBurstMaxNumberOfNodesPerMin: *scaleUpBurstNumberOfNodesPerMin,
+		ScaleUpMaxNumberOfNodesPerMin:      *scaleUpMaxNumberOfNodesPerMin,
 	}
 }
 
